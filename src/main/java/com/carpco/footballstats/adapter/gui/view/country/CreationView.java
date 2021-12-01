@@ -1,7 +1,6 @@
-package com.carpco.footballstats.adapter.gui.view.player;
+package com.carpco.footballstats.adapter.gui.view.country;
 
-import com.carpco.footballstats.adapter.gui.constants.CountryConstants;
-import com.carpco.footballstats.domain.model.Country;
+import com.carpco.footballstats.adapter.gui.dto.CountryDto;
 import com.carpco.footballstats.domain.service.CountryService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -16,29 +15,27 @@ import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.vaadin.flow.component.Key.ENTER;
 
-@Component
+@Component("country_creation")
 @Scope("prototype")
 @Route(value = CountryConstants.ROUTE_FOR_CREATING)
 @PageTitle(CountryConstants.PAGE_TITLE)
 @Slf4j
-public class CountryView extends VerticalLayout implements AfterNavigationObserver {
+@RequiredArgsConstructor
+public class CreationView extends VerticalLayout implements AfterNavigationObserver {
   
   private final transient CountryService service;
   
-  public CountryView(CountryService service) {
-    this.service = service;
-    setMargin(true);
-    setSpacing(true);
-  }
-  
   @Override
   public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
+    setMargin(true);
+    setSpacing(true);
     var title = new H4(CountryConstants.FORM_TITLE_FOR_CREATING);
     
     var countryTxf = new TextField("Country:");
@@ -60,7 +57,7 @@ public class CountryView extends VerticalLayout implements AfterNavigationObserv
   private void save(TextField countryTxf) {
     log.info("The admin user wants to save a Country");
     try {
-      service.create(Country.builder().name(countryTxf.getValue()).build());
+      service.create(new CountryDto(countryTxf.getValue()));
       showCloseDialog("Successfully saved", "The country was added!");
       countryTxf.setValue("");
       countryTxf.setInvalid(false);

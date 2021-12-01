@@ -30,14 +30,14 @@ public class CountryEntity {
   
   public Country toDomain() {
     return Country.builder()
-      .bdId(id)
+      .id(id)
       .name(name)
       .build();
   }
   
   public static CountryEntity buildFrom(Country country) {
     return CountryEntity.builder()
-      .id(country.getBdId())
+      .id(country.getId())
       .name(country.getName())
       .build();
   }

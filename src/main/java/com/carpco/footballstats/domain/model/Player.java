@@ -4,11 +4,15 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.time.LocalDate;
+
 @Getter
 @Builder
 @EqualsAndHashCode
-public class Country {
+public class Player {
   
   private Long id;
-  private String name;
+  private String firstName;
+  private String lastName;
+  private LocalDate bornDate;
 }

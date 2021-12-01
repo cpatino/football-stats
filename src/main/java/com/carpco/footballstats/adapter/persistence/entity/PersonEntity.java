@@ -12,7 +12,8 @@ import org.hibernate.annotations.SelectBeforeUpdate;
 import javax.persistence.*;
 import java.time.LocalDate;
 
-@Entity(name = "player")
+@Entity(name = "person")
+@Table(indexes = @Index(columnList = "job"))
 @OptimisticLocking(type = OptimisticLockType.DIRTY)
 @DynamicUpdate
 @SelectBeforeUpdate
@@ -20,7 +21,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlayerEntity {
+public class PersonEntity {
   
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -31,4 +32,11 @@ public class PlayerEntity {
   @ManyToOne
   @JoinColumn(name = "country_id")
   private CountryEntity country;
+  @Enumerated(EnumType.STRING)
+  private Job job;
+  
+  public enum Job {
+    
+    PLAYER, COACH
+  }
 }
