@@ -5,10 +5,14 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 @Getter
-@Builder
-@EqualsAndHashCode
-public class Country {
+@EqualsAndHashCode(callSuper = true)
+public class Country extends Domain {
   
-  private Long id;
-  private String name;
+  private final String name;
+  
+  @Builder
+  public Country(Long id, String name) {
+    super(id);
+    this.name = name;
+  }
 }

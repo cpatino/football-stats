@@ -7,12 +7,18 @@ import lombok.Getter;
 import java.time.LocalDate;
 
 @Getter
-@Builder
-@EqualsAndHashCode
-public class Player {
+@EqualsAndHashCode(callSuper = true)
+public class Player extends Domain {
   
-  private Long id;
-  private String firstName;
-  private String lastName;
-  private LocalDate bornDate;
+  private final Name name;
+  private final LocalDate bornDate;
+  private final Country country;
+  
+  @Builder
+  public Player(Long id, Name name, LocalDate bornDate, Country country) {
+    super(id);
+    this.name = name;
+    this.bornDate = bornDate;
+    this.country = country;
+  }
 }

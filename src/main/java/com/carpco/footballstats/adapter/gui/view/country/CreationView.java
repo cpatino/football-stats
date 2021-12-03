@@ -1,7 +1,7 @@
 package com.carpco.footballstats.adapter.gui.view.country;
 
-import com.carpco.footballstats.adapter.gui.dto.CountryDto;
-import com.carpco.footballstats.domain.service.CountryService;
+import com.carpco.footballstats.domain.model.Country;
+import com.carpco.footballstats.domain.service.CreationService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -24,26 +24,26 @@ import static com.vaadin.flow.component.Key.ENTER;
 
 @Component("country_creation")
 @Scope("prototype")
-@Route(value = CountryConstants.ROUTE_FOR_CREATING)
-@PageTitle(CountryConstants.PAGE_TITLE)
+@Route(value = Constants.ROUTE_FOR_CREATING)
+@PageTitle(Constants.PAGE_TITLE)
 @Slf4j
 @RequiredArgsConstructor
 public class CreationView extends VerticalLayout implements AfterNavigationObserver {
   
-  private final transient CountryService service;
+  private final transient CreationService<Country> service;
   
   @Override
   public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
     setMargin(true);
     setSpacing(true);
-    var title = new H4(CountryConstants.FORM_TITLE_FOR_CREATING);
+    var title = new H4(Constants.FORM_TITLE_FOR_CREATING);
     
     var countryTxf = new TextField("Country:");
     countryTxf.setRequiredIndicatorVisible(true);
     countryTxf.setRequired(true);
     countryTxf.setErrorMessage("The country name is required!");
     
-    var saveBtn = new Button("Save", evt -> showConfirmationDialog(countryTxf));
+    var saveBtn = new Button("Save", evt -> beforeSave(countryTxf));
     saveBtn.addClickShortcut(ENTER);
     
     var formLayout = new FormLayout();
@@ -54,46 +54,24 @@ public class CreationView extends VerticalLayout implements AfterNavigationObser
     add(title, formLayout);
   }
   
-  private void save(TextField countryTxf) {
-    log.info("The admin user wants to save a Country");
-    try {
-      service.create(new CountryDto(countryTxf.getValue()));
-      showCloseDialog("Successfully saved", "The country was added!");
-      countryTxf.setValue("");
-      countryTxf.setInvalid(false);
-    } catch (IllegalStateException ex) {
-      showCloseDialog("Error!", ex.getMessage());
-    }
-  }
-  
-  private void showConfirmationDialog(TextField countryTxf) {
+  private void beforeSave(TextField countryTxf) {
     if (countryTxf.getValue().isBlank()) {
-      countryTxf.setInvalid(true);
-      countryTxf.setValue("");
+      resetCountryTextField(countryTxf, true);
     } else {
-      var dialog = buildDialog();
-      
-      var dialogButtonsLayout = new HorizontalLayout();
-      dialogButtonsLayout.add(new NativeButton("Yes", evt -> closeAndSave(countryTxf, dialog)), new NativeButton("No", evt -> dialog.close()));
-      
-      var verticalLayout = new VerticalLayout();
-      verticalLayout.add(new Label("Save country!"), new Label("Do you want to save the country!"), dialogButtonsLayout);
-      
-      dialog.add(verticalLayout);
-      dialog.open();
+      openConfirmationDialog(countryTxf);
     }
   }
   
-  private void closeAndSave(TextField countryTxf, Dialog dialog) {
-    dialog.close();
-    save(countryTxf);
-  }
-  
-  private void showCloseDialog(String title, String message) {
+  private void openConfirmationDialog(TextField countryTxf) {
     var dialog = buildDialog();
     
+    var dialogButtonsLayout = new HorizontalLayout();
+    var saveBtn = new NativeButton("Yes", evt -> save(countryTxf, dialog));
+    var closeBtn = new NativeButton("No", evt -> dialog.close());
+    dialogButtonsLayout.add(saveBtn, closeBtn);
+    
     var verticalLayout = new VerticalLayout();
-    verticalLayout.add(new Label(title), new Label(message), new NativeButton("Close", event -> dialog.close()));
+    verticalLayout.add(new Label("Save country!"), new Label("Do you want to save the country!"), dialogButtonsLayout);
     
     dialog.add(verticalLayout);
     dialog.open();
@@ -104,5 +82,40 @@ public class CreationView extends VerticalLayout implements AfterNavigationObser
     dialog.setCloseOnEsc(false);
     dialog.setCloseOnOutsideClick(false);
     return dialog;
+  }
+  
+  private void save(TextField countryTxf, Dialog dialog) {
+    log.info("The admin user wants to save a Country");
+    dialog.close();
+    tryToSave(countryTxf);
+  }
+  
+  private void tryToSave(TextField countryTxf) {
+    try {
+      service.create(Country.builder().name(countryTxf.getValue()).build());
+      afterSave(countryTxf);
+    } catch (IllegalStateException ex) {
+      showCloseDialog("Error!", ex.getMessage());
+    }
+  }
+  
+  private void afterSave(TextField countryTxf) {
+    showCloseDialog("Successfully saved", "The country was added!");
+    resetCountryTextField(countryTxf, false);
+  }
+  
+  private void resetCountryTextField(TextField countryTxf, boolean isInvalid) {
+    countryTxf.setValue("");
+    countryTxf.setInvalid(isInvalid);
+  }
+  
+  private void showCloseDialog(String title, String message) {
+    var dialog = buildDialog();
+    
+    var verticalLayout = new VerticalLayout();
+    verticalLayout.add(new Label(title), new Label(message), new NativeButton("Close", event -> dialog.close()));
+    
+    dialog.add(verticalLayout);
+    dialog.open();
   }
 }

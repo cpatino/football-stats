@@ -1,4 +1,6 @@
 package com.carpco.footballstats.domain.gateway;
 
-public interface PlayerPersistenceGateway {
+import com.carpco.footballstats.domain.model.Player;
+
+public interface PlayerPersistenceGateway extends SaveGateway<Player> {
 }
