@@ -1,6 +1,6 @@
 package com.carpco.footballstats.domain.service;
 
-public interface CreationService<T> {
+public interface Creator<T> {
   
   T create(T newDomain);
 }

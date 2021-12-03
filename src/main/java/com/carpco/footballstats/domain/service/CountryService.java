@@ -7,23 +7,29 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-class CountryService implements CreationService<Country> {
+class CountryService implements Creator<Country>, Finder<Country> {
   
-  private final CountryPersistenceGateway persistenceGateway;
+  private final CountryPersistenceGateway gateway;
   
   @Override
   public Country create(Country country) {
     checkIfCountryAlreadyExists(country.getName());
-    return persistenceGateway.save(country);
+    return gateway.save(country);
+  }
+  
+  @Override
+  public Stream<Country> findAllEnabled() {
+    return gateway.findAllNotDeleted();
   }
   
   private void checkIfCountryAlreadyExists(String countryName) {
     try {
-      var country = persistenceGateway.findBy(countryName);
+      var country = gateway.findByNaturalId(countryName);
       log.warn("The country with name {} was already created, the operation cannot be completed!", country.getName());
       throw new IllegalStateException("This country is already in the database, try again with a new country!");
     } catch (EntityNotFoundException ex) {

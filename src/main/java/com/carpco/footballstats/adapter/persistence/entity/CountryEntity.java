@@ -1,6 +1,5 @@
 package com.carpco.footballstats.adapter.persistence.entity;
 
-import com.carpco.footballstats.domain.model.Country;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,18 +26,5 @@ public class CountryEntity {
   private Long id;
   @NaturalId
   private String name;
-  
-  public Country toDomain() {
-    return Country.builder()
-      .id(id)
-      .name(name)
-      .build();
-  }
-  
-  public static CountryEntity buildFrom(Country country) {
-    return CountryEntity.builder()
-      .id(country.getId())
-      .name(country.getName())
-      .build();
-  }
+  private boolean deleted;
 }

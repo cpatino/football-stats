@@ -34,6 +34,7 @@ public class PersonEntity {
   private CountryEntity country;
   @Enumerated(EnumType.STRING)
   private Job job;
+  private boolean deleted;
   
   public enum Job {
     

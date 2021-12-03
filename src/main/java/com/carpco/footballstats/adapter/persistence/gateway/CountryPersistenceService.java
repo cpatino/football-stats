@@ -10,21 +10,33 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
-class CountryPersistenceService extends AbstractSaveGateway<CountryEntity, Country> implements CountryPersistenceGateway {
+class CountryPersistenceService extends AbstractGateway<CountryEntity, Country> implements CountryPersistenceGateway {
   
   public CountryPersistenceService(Mapper<CountryEntity, Country> mapper, JpaRepository<CountryEntity, Long> repository) {
     super(mapper, repository);
   }
   
   @Override
-  public Country findBy(String countryName) {
+  public Country findByNaturalId(String countryName) {
     log.info("Checking if the given country {} already exists into the database", countryName);
     return getRepository().findByName(countryName)
-      .map(CountryEntity::toDomain)
+      .map(getMapper()::toDomain)
       .orElseThrow(() -> new EntityNotFoundException("The country was not found using the name " + countryName));
+  }
+  
+  @Override
+  public Stream<Country> findAllNotDeleted() {
+    return getRepository().findByDeletedFalse().stream()
+      .parallel()
+      .map(getMapper()::toDomain)
+      .sorted(Comparator.comparing(Country::getName))
+      .toList()
+      .stream();
   }
   
   @Override
