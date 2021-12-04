@@ -25,22 +25,22 @@ class CountryPersistenceService extends AbstractGateway<CountryEntity, Country> 
   public Country findByNaturalId(String countryName) {
     log.info("Checking if the given country {} already exists into the database", countryName);
     return getRepository().findByName(countryName)
-      .map(getMapper()::toDomain)
+      .map(mapper::toDomain)
       .orElseThrow(() -> new EntityNotFoundException("The country was not found using the name " + countryName));
   }
   
   @Override
   public Stream<Country> findAllNotDeleted() {
-    return getRepository().findByDeletedFalse().stream()
+    return getRepository().findByDeletedFalse()
+      .stream()
       .parallel()
-      .map(getMapper()::toDomain)
+      .map(mapper::toDomain)
       .sorted(Comparator.comparing(Country::getName))
       .toList()
       .stream();
   }
   
-  @Override
   public CountryRepository getRepository() {
-    return (CountryRepository) super.getRepository();
+    return (CountryRepository) repository;
   }
 }

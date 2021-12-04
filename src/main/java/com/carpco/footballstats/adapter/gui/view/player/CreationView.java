@@ -1,6 +1,10 @@
 package com.carpco.footballstats.adapter.gui.view.player;
 
+import com.carpco.footballstats.adapter.gui.view.common.CommonDialog;
+import com.carpco.footballstats.adapter.gui.view.common.CreationVerticalLayout;
+import com.carpco.footballstats.adapter.gui.view.common.DefaultVerticalLayout;
 import com.carpco.footballstats.domain.model.Country;
+import com.carpco.footballstats.domain.model.Name;
 import com.carpco.footballstats.domain.model.Player;
 import com.carpco.footballstats.domain.service.Creator;
 import com.carpco.footballstats.domain.service.Finder;
@@ -9,12 +13,12 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -24,9 +28,10 @@ import static com.vaadin.flow.component.Key.ENTER;
 @Scope("prototype")
 @Route(value = Constants.ROUTE_FOR_CREATING)
 @PageTitle(Constants.PAGE_TITLE)
-public class CreationView extends VerticalLayout implements AfterNavigationObserver {
+@Slf4j
+public class CreationView extends CreationVerticalLayout implements AfterNavigationObserver {
   
-  private final transient Creator<Player> service;
+  private final transient Creator<Player> playerCreator;
   private final transient Finder<Country> countryFinder;
   
   private TextField firstNameTxf;
@@ -34,8 +39,9 @@ public class CreationView extends VerticalLayout implements AfterNavigationObser
   private DatePicker bornDtp;
   private ComboBox<Country> nationalityCbx;
   
-  public CreationView(Creator<Player> service, Finder<Country> countryFinder) {
-    this.service = service;
+  public CreationView(Creator<Player> playerCreator, Finder<Country> countryFinder, CommonDialog dialog) {
+    super(dialog);
+    this.playerCreator = playerCreator;
     this.countryFinder = countryFinder;
     initUI();
   }
@@ -65,7 +71,7 @@ public class CreationView extends VerticalLayout implements AfterNavigationObser
     nationalityCbx.setRequired(true);
     nationalityCbx.setErrorMessage("The nationality is required!");
     
-    var saveBtn = new Button("Save", evt -> beforeSave());
+    var saveBtn = new Button("Save", evt -> executeSave());
     saveBtn.addClickShortcut(ENTER);
     
     var formLayout = new FormLayout();
@@ -82,7 +88,33 @@ public class CreationView extends VerticalLayout implements AfterNavigationObser
     nationalityCbx.setItemLabelGenerator(Country::getName);
   }
   
-  private void beforeSave() {
+  @Override
+  protected boolean canBeSaved() {
+    return isComponentEmpty(firstNameTxf) && isComponentEmpty(lastNameTxf) && isComponentEmpty(bornDtp)
+      && isComponentEmpty(nationalityCbx);
+  }
   
+  @Override
+  protected void tryToSave() {
+    log.info("Saving a new player!");
+    var player = Player.builder()
+      .name(new Name(firstNameTxf.getValue(), lastNameTxf.getValue()))
+      .bornDate(bornDtp.getValue())
+      .country(nationalityCbx.getValue())
+      .build();
+    playerCreator.create(player);
+  }
+  
+  @Override
+  protected void cleanFields() {
+    firstNameTxf.setValue("");
+    lastNameTxf.setValue("");
+    bornDtp.setValue(null);
+    nationalityCbx.setValue(null);
+    
+    firstNameTxf.setInvalid(false);
+    lastNameTxf.setInvalid(false);
+    bornDtp.setInvalid(false);
+    nationalityCbx.setInvalid(false);
   }
 }

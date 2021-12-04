@@ -1,12 +1,12 @@
 package com.carpco.footballstats.adapter.gui.view.country;
 
 import com.carpco.footballstats.adapter.gui.view.common.CommonDialog;
+import com.carpco.footballstats.adapter.gui.view.common.CreationVerticalLayout;
 import com.carpco.footballstats.domain.model.Country;
 import com.carpco.footballstats.domain.service.Creator;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -21,16 +21,15 @@ import static com.vaadin.flow.component.Key.ENTER;
 @Route(value = Constants.ROUTE_FOR_CREATING)
 @PageTitle(Constants.PAGE_TITLE)
 @Slf4j
-public class CreationView extends VerticalLayout {
+public class CreationView extends CreationVerticalLayout {
   
-  private final transient Creator<Country> service;
-  private final transient CommonDialog dialog;
+  private final transient Creator<Country> countryCreator;
   
   private TextField countryTxf;
   
-  public CreationView(Creator<Country> service, CommonDialog dialog) {
-    this.service = service;
-    this.dialog = dialog;
+  public CreationView(Creator<Country> countryCreator, CommonDialog dialog) {
+    super(dialog);
+    this.countryCreator = countryCreator;
     initUI();
   }
   
@@ -44,7 +43,7 @@ public class CreationView extends VerticalLayout {
     countryTxf.setRequired(true);
     countryTxf.setErrorMessage("The country name is required!");
     
-    var saveBtn = new Button("Save", evt -> beforeSave());
+    var saveBtn = new Button("Save", evt -> executeSave());
     saveBtn.addClickShortcut(ENTER);
     
     var formLayout = new FormLayout();
@@ -55,35 +54,23 @@ public class CreationView extends VerticalLayout {
     add(title, formLayout, saveBtn);
   }
   
-  private void beforeSave() {
-    if (countryTxf.getValue().isBlank()) {
-      resetCountryTextField(true);
-    } else {
-      dialog.openConfirmationDialog(this::save);
-    }
+  @Override
+  protected boolean canBeSaved() {
+    return isComponentEmpty(countryTxf);
   }
   
-  private void save() {
-    log.info("The admin user wants to save a Country");
-    try {
-      tryToSave();
-    } catch (IllegalStateException ex) {
-      dialog.openClosableDialog("Error!", ex.getMessage());
-    }
+  @Override
+  protected void tryToSave() {
+    log.info("Saving a new country!");
+    var country = Country.builder()
+      .name(countryTxf.getValue())
+      .build();
+    countryCreator.create(country);
   }
   
-  private void tryToSave() {
-    service.create(Country.builder().name(countryTxf.getValue()).build());
-    afterSave();
-  }
-  
-  private void afterSave() {
-    dialog.openClosableDialog("Successfully saved", "The country was added!");
-    resetCountryTextField(false);
-  }
-  
-  private void resetCountryTextField(boolean isInvalid) {
+  @Override
+  protected void cleanFields() {
     countryTxf.setValue("");
-    countryTxf.setInvalid(isInvalid);
+    countryTxf.setInvalid(false);
   }
 }
