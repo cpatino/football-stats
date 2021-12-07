@@ -2,7 +2,6 @@ package com.carpco.footballstats.adapter.gui.view.common;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public abstract class DefaultVerticalLayout extends VerticalLayout {

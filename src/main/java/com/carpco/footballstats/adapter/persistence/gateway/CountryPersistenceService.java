@@ -40,7 +40,7 @@ class CountryPersistenceService extends AbstractGateway<CountryEntity, Country> 
       .stream();
   }
   
-  public CountryRepository getRepository() {
+  private CountryRepository getRepository() {
     return (CountryRepository) repository;
   }
 }
