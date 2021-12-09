@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-class PersonPersistenceService extends AbstractGateway<PersonEntity, Player> implements PlayerPersistenceGateway {
+class PersonPersistenceService extends GatewayPattern<PersonEntity, Player> implements PlayerPersistenceGateway {
   
   public PersonPersistenceService(Mapper<PersonEntity, Player> mapper, JpaRepository<PersonEntity, Long> repository) {
     super(mapper, repository);

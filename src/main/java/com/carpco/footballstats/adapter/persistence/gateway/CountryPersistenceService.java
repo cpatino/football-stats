@@ -11,11 +11,12 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Service
 @Slf4j
-class CountryPersistenceService extends AbstractGateway<CountryEntity, Country> implements CountryPersistenceGateway {
+class CountryPersistenceService extends GatewayPattern<CountryEntity, Country> implements CountryPersistenceGateway {
   
   public CountryPersistenceService(Mapper<CountryEntity, Country> mapper, JpaRepository<CountryEntity, Long> repository) {
     super(mapper, repository);
@@ -23,6 +24,11 @@ class CountryPersistenceService extends AbstractGateway<CountryEntity, Country> 
   
   @Override
   public Country findByNaturalId(String countryName) {
+    if (Objects.isNull(countryName) || countryName.isBlank()) {
+      log.info("The country name should be non null or blank");
+      throw new IllegalArgumentException("The country name should be non null or blank");
+    }
+    
     log.info("Checking if the given country {} already exists into the database", countryName);
     return getRepository().findByName(countryName)
       .map(mapper::toDomain)

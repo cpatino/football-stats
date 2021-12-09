@@ -9,12 +9,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(classes = {PlayerMapper.class, CountryMapper.class})
 class PlayerMapperTest {
   
   @Autowired
   private Mapper<PersonEntity, Player> mapper;
+  
+  @Test
+  void givenNullParameter_whenMapToEntity_thenNullPointerExceptionIsThrown() {
+    assertThatThrownBy(() -> mapper.toEntity(null)).isInstanceOf(NullPointerException.class);
+  }
   
   @Test
   void givenPlayer_whenMapToEntity_thenEntityShouldBeEqual() {
@@ -24,5 +30,10 @@ class PlayerMapperTest {
   @Test
   void givenPersonEntity_whenMapToDomain_thenDomainShouldBeEqual() {
     assertThat(mapper.toDomain(TestEntityUtils.PERSON_ALVARO_MORATA)).isEqualTo(TestDomainUtils.PLAYER_ALVARO_MORATA);
+  }
+  
+  @Test
+  void givenNullParameter_whenMapToDomain_thenNullPointerExceptionIsThrown() {
+    assertThatThrownBy(() -> mapper.toDomain(null)).isInstanceOf(NullPointerException.class);
   }
 }
